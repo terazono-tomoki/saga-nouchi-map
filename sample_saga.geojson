@@ -1,0 +1,65 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          130.298,
+          33.268
+        ]
+      },
+      "properties": {
+        "所在・地番": "大字八戸 26-7",
+        "地目": "田",
+        "面積(㎡)": "1204"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          130.305,
+          33.271
+        ]
+      },
+      "properties": {
+        "所在・地番": "大字八戸 27-1",
+        "地目": "田",
+        "面積(㎡)": "988"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          130.311,
+          33.262
+        ]
+      },
+      "properties": {
+        "所在・地番": "大字巨勢町 112-3",
+        "地目": "畑",
+        "面積(㎡)": "756"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          130.293,
+          33.259
+        ]
+      },
+      "properties": {
+        "所在・地番": "大字鍋島 5-14",
+        "地目": "田",
+        "面積(㎡)": "1502"
+      }
+    }
+  ]
+}
