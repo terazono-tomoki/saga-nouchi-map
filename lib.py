@@ -38,8 +38,50 @@ def search_text(props: dict) -> str:
     return normalize(" ".join(str(v) for v in props.values()))
 
 
+def _ring_centroid(ring: list) -> tuple:
+    """閉じたリング（[[lng,lat], ...]）の面積重心を返す（shoelace公式）"""
+    n = len(ring)
+    area2 = cx = cy = 0.0
+    for i in range(n - 1):
+        x0, y0 = ring[i][0], ring[i][1]
+        x1, y1 = ring[i + 1][0], ring[i + 1][1]
+        cross = x0 * y1 - x1 * y0
+        area2 += cross
+        cx += (x0 + x1) * cross
+        cy += (y0 + y1) * cross
+    if abs(area2) < 1e-12:
+        xs = [p[0] for p in ring]
+        ys = [p[1] for p in ring]
+        return sum(xs) / len(xs), sum(ys) / len(ys)
+    return cx / (3 * area2), cy / (3 * area2)
+
+
+def _ring_area(ring: list) -> float:
+    area2 = 0.0
+    for i in range(len(ring) - 1):
+        x0, y0 = ring[i][0], ring[i][1]
+        x1, y1 = ring[i + 1][0], ring[i + 1][1]
+        area2 += x0 * y1 - x1 * y0
+    return abs(area2) / 2
+
+
+def polygon_centroid_latlng(geom: dict) -> list:
+    """Polygon/MultiPolygonの重心を [lat, lng] で返す"""
+    coords = geom.get("coordinates") or []
+    gtype = geom.get("type")
+    if gtype == "Polygon":
+        rings = [coords[0]] if coords else []
+    else:  # MultiPolygon: 面積が一番大きい部分を代表点にする
+        exterior_rings = [poly[0] for poly in coords if poly]
+        rings = [max(exterior_rings, key=_ring_area)] if exterior_rings else []
+    if not rings or len(rings[0]) < 3:
+        return [0.0, 0.0]
+    lng, lat = _ring_centroid(rings[0])
+    return [lat, lng]
+
+
 def extract_features(geojsons: list) -> tuple[list, list]:
-    """読み込んだGeoJSON群から 農地ピン(点) と 筆ポリゴン を取り出す"""
+    """読み込んだGeoJSON群から 検索対象のピン(点+筆ポリゴン重心) と 筆ポリゴン(描画用) を取り出す"""
     pins, polys = [], []
     for gj in geojsons:
         for f in gj.get("features", []):
@@ -57,6 +99,13 @@ def extract_features(geojsons: list) -> tuple[list, list]:
                 })
             elif gtype in ("Polygon", "MultiPolygon"):
                 polys.append(f)
+                pins.append({
+                    "latlng": polygon_centroid_latlng(geom),
+                    "props": props,
+                    "chiban": pick_chiban(props),
+                    "loc": pick_location(props),
+                    "search": search_text(props),
+                })
     return pins, polys
 
 
