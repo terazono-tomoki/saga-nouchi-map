@@ -71,7 +71,7 @@ if uploaded:
     gjs = []
     for uf in uploaded:
         try:
-            gjs.append(json.loads(uf.getvalue().decode("utf-8")))
+            gjs.append(json.loads(uf.getvalue().decode("utf-8-sig")))
         except Exception as e:  # noqa
             st.error(f"{uf.name} を読み込めませんでした: {e}")
     if gjs:
