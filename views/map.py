@@ -62,6 +62,12 @@ folium.TileLayer(
     max_zoom=MAX_ZOOM, max_native_zoom=19,
 ).add_to(fmap)
 folium.TileLayer(
+    tiles="https://cyberjapandata.gsi.go.jp/xyz/seamlessphoto/{z}/{x}/{y}.jpg",
+    attr='<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank">地理院タイル</a>(国土地理院)',
+    name="航空写真(国土地理院)",
+    max_zoom=MAX_ZOOM, max_native_zoom=18,
+).add_to(fmap)
+folium.TileLayer(
     "OpenStreetMap", name="標準地図(OSM)",
     max_zoom=MAX_ZOOM, max_native_zoom=19,
 ).add_to(fmap)
