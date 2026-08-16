@@ -56,12 +56,6 @@ MAX_ZOOM = 22  # タイルの実解像度(19前後)を超えた分は自動で�
 
 fmap = folium.Map(location=[lat, lng], zoom_start=18, max_zoom=MAX_ZOOM, tiles=None)
 folium.TileLayer(
-    tiles="https://server.arcgisonline.com/ArcGIS/rest/services/"
-          "World_Imagery/MapServer/tile/{z}/{y}/{x}",
-    attr="Esri World Imagery", name="航空写真(Esri)",
-    max_zoom=MAX_ZOOM, max_native_zoom=19,
-).add_to(fmap)
-folium.TileLayer(
     tiles="https://cyberjapandata.gsi.go.jp/xyz/seamlessphoto/{z}/{x}/{y}.jpg",
     attr='<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank">地理院タイル</a>(国土地理院)',
     name="航空写真(国土地理院)",
