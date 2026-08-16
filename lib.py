@@ -2,7 +2,10 @@
 佐賀 農地マップ検索 — 共通ロジック
 検索ページ（app.py）とマップページ（pages/1_マップ.py）から共有する。
 """
+import math
 import unicodedata
+
+MAX_ROUTE_STOPS = 10  # Google Maps方向案内URLの現実的な上限（出発地+経由地+目的地）
 
 SAGA = [33.263, 130.301]  # 佐賀市付近
 
@@ -135,6 +138,41 @@ def popup_html(props: dict) -> str:
 def google_maps_url(lat: float, lng: float) -> str:
     """カーナビのターンバイターン案内をそのまま開けるGoogle MapsのURL"""
     return f"https://www.google.com/maps/dir/?api=1&destination={lat},{lng}&travelmode=driving"
+
+
+def haversine_km(a: list, b: list) -> float:
+    """2地点間の直線距離(km)。道路距離ではなく巡回順の目安計算用の簡易近似"""
+    lat1, lng1 = math.radians(a[0]), math.radians(a[1])
+    lat2, lng2 = math.radians(b[0]), math.radians(b[1])
+    dlat, dlng = lat2 - lat1, lng2 - lng1
+    h = math.sin(dlat / 2) ** 2 + math.cos(lat1) * math.cos(lat2) * math.sin(dlng / 2) ** 2
+    return 2 * 6371 * math.asin(math.sqrt(h))
+
+
+def nearest_neighbor_order(stops: list) -> list:
+    """最初の1件を起点に、直線距離が近い順へ並べ替える（簡易巡回順・最適解ではない）"""
+    if len(stops) <= 2:
+        return list(stops)
+    remaining = list(stops[1:])
+    ordered = [stops[0]]
+    while remaining:
+        last = ordered[-1]
+        nxt = min(remaining, key=lambda p: haversine_km(last["latlng"], p["latlng"]))
+        ordered.append(nxt)
+        remaining.remove(nxt)
+    return ordered
+
+
+def multi_stop_google_maps_url(stops: list) -> str:
+    """複数地点を順番にめぐるGoogle Mapsの経路案内URL（先頭が出発地）"""
+    points = [f"{p['latlng'][0]},{p['latlng'][1]}" for p in stops[:MAX_ROUTE_STOPS]]
+    origin, destination = points[0], points[-1]
+    waypoints = points[1:-1]
+    url = (f"https://www.google.com/maps/dir/?api=1&origin={origin}"
+           f"&destination={destination}&travelmode=driving")
+    if waypoints:
+        url += "&waypoints=" + "|".join(waypoints)
+    return url
 
 
 def sample_geojson() -> dict:
